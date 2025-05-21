@@ -1,0 +1,10 @@
+*.env
+
+*.pyc
+
+*.md
+
+*.json
+
+cache/
+cache/*
