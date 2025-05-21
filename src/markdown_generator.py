@@ -69,6 +69,11 @@ class MarkdownGenerator:
         # Add each article
         for article in processed_articles:
             markdown += f"## {article.article.title}\n\n"
+            
+            # Add image if available
+            if article.article.image_url:
+                markdown += f"<img src=\"{article.article.image_url}\" width=\"500px\">\n\n"
+            
             markdown += f"*Source: {article.article.source}*\n\n"
             
             if article.summary:

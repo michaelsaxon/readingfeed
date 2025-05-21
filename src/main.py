@@ -46,14 +46,20 @@ def process_articles_sequentially(
         else:
             # Fetch content for main article
             logger.info(f"Fetching content from {article.link}")
-            main_content = content_fetcher.fetch_article_content(article.link)
-            
+            main_content, main_image = content_fetcher.fetch_article_content(article.link)
+
+            if main_image:
+                article.image_url = main_image
+
             # Fetch content for related articles
             related_contents = []
             for related in article.related_links:
                 logger.info(f"Fetching related article: {related.title}")
                 if content := content_fetcher.fetch_article_content(related.link):
-                    related_contents.append(f"Related Article from {related.link}:\n{content}")
+                    related_content, related_image = content
+                    related_contents.append(f"Related Article from {related.link}:\n{related_content}")
+                    if related_image and not article.image_url:  # Use first available image
+                        article.image_url = related_image
             
             # Combine all content
             full_content = f"Main Article from {article.link}:\n{main_content}\n\n"

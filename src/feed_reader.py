@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import feedparser
 from abc import ABC, abstractmethod
 import logging
@@ -14,6 +14,7 @@ class Article:
         self.summary = summary
         self.source = source
         self.related_links: List['Article'] = []
+        self.image_url: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -22,7 +23,8 @@ class Article:
             "published": self.published,
             "summary": self.summary,
             "source": self.source,
-            "related_links": [rel.to_dict() for rel in self.related_links]
+            "related_links": [rel.to_dict() for rel in self.related_links],
+            "image_url": self.image_url
         }
 
 class ContentSource(ABC):

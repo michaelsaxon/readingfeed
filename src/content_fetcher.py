@@ -107,6 +107,58 @@ class ContentFetcher:
         text = '\n'.join(line.strip() for line in text.split('\n') if line.strip())
         return text
 
+    def _extract_image(self, soup: BeautifulSoup, domain: str) -> Optional[str]:
+        """Extract the main image URL from the article."""
+        # Try domain-specific rules first
+        if 'techcrunch.com' in domain:
+            # Try post thumbnail first
+            selectors = [
+                'img.attachment-post-thumbnail.size-post-thumbnail.wp-post-image',
+                'img.wp-post-image',
+                'img.featured-image',
+                'img[class*="post-thumbnail"]'
+            ]
+            
+            for selector in selectors:
+                img = soup.select_one(selector)
+                if img and img.get('src'):
+                    # Skip author images
+                    if 'author' not in img['src'].lower() and 'avatar' not in img['src'].lower():
+                        return img['src']
+            
+            # Fallback to first large image in content
+            for img in soup.select('main.template-content img'):
+                if img.get('src') and ('wp-content' in img['src'] or 'techcrunch' in img['src']):
+                    # Skip author images
+                    if 'author' not in img['src'].lower() and 'avatar' not in img['src'].lower():
+                        return img['src']
+        else:
+            # Generic image extraction
+            # Try common image selectors
+            selectors = [
+                'meta[property="og:image"]',
+                'meta[name="twitter:image"]',
+                'img.featured-image',
+                'img.article-image',
+                'img[class*="hero"]',
+                'img[class*="featured"]'
+            ]
+            
+            for selector in selectors:
+                element = soup.select_one(selector)
+                if element:
+                    if element.name == 'meta':
+                        return element.get('content')
+                    elif element.name == 'img':
+                        return element.get('src')
+            
+            # Fallback to first large image in content
+            for img in soup.select('article img, main img'):
+                if img.get('src') and not any(x in img['src'].lower() for x in ['icon', 'logo', 'avatar', 'author']):
+                    return img['src']
+        
+        return None
+
     def fetch_article_content(self, url: str) -> Optional[str]:
         """Fetch and parse article content from URL."""
         try:
@@ -151,18 +203,25 @@ class ContentFetcher:
                     logger.info(f"Successfully extracted content from {clean_url} (length: {len(content)} chars)")
                 # Cache the content if in verbose mode
                 self._save_to_cache(clean_url, content)
-                return content
+                
+                # Extract image URL
+                image_url = self._extract_image(soup, domain)
+                if image_url:
+                    if self.verbose:
+                        logger.info(f"Found image: {image_url}")
+                    return content, image_url
+                return content, None
             else:
                 logger.warning(f"Could not extract content from {clean_url}")
                 if self.verbose:
                     logger.info("Available HTML structure:")
                     for tag in soup.find_all(['article', 'main', '.post-content', '.article-content']):
                         logger.info(f"Found potential content container: {tag.name} with class {tag.get('class', 'no-class')}")
-                return None
+                return None, None
                 
         except requests.exceptions.RequestException as e:
             logger.error(f"Error fetching {url}: {str(e)}")
-            return None
+            return None, None
         except Exception as e:
             logger.error(f"Unexpected error processing {url}: {str(e)}")
-            return None 
+            return None, None 
