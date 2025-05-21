@@ -2,8 +2,6 @@
 
 *.pyc
 
-*.md
-
 *.json
 
 cache/
