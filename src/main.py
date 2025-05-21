@@ -5,6 +5,7 @@ from article_processor import ArticleProcessor, KeywordFilter, MaxArticlesFilter
 from llm_processor import LLMProcessor, ProcessedArticle
 from markdown_generator import MarkdownGenerator
 from content_fetcher import ContentFetcher
+from article_ranker import DiversityRanker
 import logging
 import json
 from datetime import datetime
@@ -87,6 +88,7 @@ def main():
     llm_processor = LLMProcessor()
     markdown_generator = MarkdownGenerator()
     content_fetcher = ContentFetcher(verbose=config.get('verbose', False))
+    article_ranker = DiversityRanker()
 
     # Add RSS sources
     for source in config.get('rss_sources', []):
@@ -111,6 +113,10 @@ def main():
     logger.info("Filtering articles...")
     filtered_articles = article_processor.process_articles(articles)
     
+    # Rank articles by diversity
+    logger.info("Ranking articles by diversity...")
+    ranked_articles = article_ranker.rank_articles(filtered_articles)
+    
     # Check if we're in dry run mode
     dry_run = config.get('dry_run', False)
     if dry_run:
@@ -118,7 +124,7 @@ def main():
     
     logger.info("Processing articles sequentially...")
     processed_articles = process_articles_sequentially(
-        filtered_articles,
+        ranked_articles,  # Use ranked articles instead of filtered articles
         content_fetcher,
         llm_processor,
         dry_run

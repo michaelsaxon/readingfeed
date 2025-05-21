@@ -4,6 +4,8 @@ import google.generativeai as genai
 from feed_reader import Article
 import logging
 from dotenv import load_dotenv
+import time
+import random
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -22,13 +24,18 @@ class ProcessedArticle:
         }
 
 class LLMProcessor:
-    def __init__(self):
+    def __init__(self, max_retries: int = 5, initial_backoff: float = 1.0, max_backoff: float = 32.0):
         api_key = os.getenv("GOOGLE_API_KEY")
         if not api_key:
             raise ValueError("GOOGLE_API_KEY environment variable is not set")
         
         genai.configure(api_key=api_key)
         self.model = genai.GenerativeModel('gemini-2.0-flash')
+        
+        # Retry configuration
+        self.max_retries = max_retries
+        self.initial_backoff = initial_backoff
+        self.max_backoff = max_backoff
         
         self.prompt_template = """
         You are a news gathering assistant working for an AI researcher who wants to be regularly updated on developments in industry and technology, as well as global news.
@@ -52,9 +59,9 @@ class LLMProcessor:
         3. Multilingual and multicultural generative AI: making systems useful and responsive to needs and expectations of users from around the world.
         This might entail looking for impacts that a new technology may have internationally, and calling out perspectives that are given by people in other countries (ie, China, Japan, Europe, Africa)
         Sample abstract 1:
-            We propose “Conceptual Coverage Across Languages” (CoCo-CroLa), a technique for benchmarking the degree to which any generative text-to-image system provides multilingual parity to its training language in terms of tangible nouns. For each model we can assess “conceptual coverage” of a given target language relative to a source language by comparing the population of images generated for a series of tangible nouns in the source language to the population of images generated for each noun under translation in the target language. This technique allows us to estimate how well-suited a model is to a target language as well as identify model-specific weaknesses, spurious correlations, and biases without a-priori assumptions. We demonstrate how it can be used to benchmark T2I models in terms of multilinguality, and how despite its simplicity it is a good proxy for impressive generalization.
+            We propose "Conceptual Coverage Across Languages" (CoCo-CroLa), a technique for benchmarking the degree to which any generative text-to-image system provides multilingual parity to its training language in terms of tangible nouns. For each model we can assess "conceptual coverage" of a given target language relative to a source language by comparing the population of images generated for a series of tangible nouns in the source language to the population of images generated for each noun under translation in the target language. This technique allows us to estimate how well-suited a model is to a target language as well as identify model-specific weaknesses, spurious correlations, and biases without a-priori assumptions. We demonstrate how it can be used to benchmark T2I models in terms of multilinguality, and how despite its simplicity it is a good proxy for impressive generalization.
         Sample abstract 2:
-            Benchmarks of the multilingual capabilities of text-to-image (T2I) models compare generated images prompted in a test language to an expected image distribution over a concept set. One such benchmark, “Conceptual Coverage Across Languages” (CoCo-CroLa), assesses the tangible noun inventory of T2I models by prompting them to generate pictures from a concept list translated to seven languages and comparing the output image populations. Unfortunately, we find that this benchmark contains translation errors of varying severity in Spanish, Japanese, and Chinese. We provide corrections for these errors and analyze how impactful they are on the utility and validity of CoCo-CroLa as a benchmark. We reassess multiple baseline T2I models with the revisions, compare the outputs elicited under the new translations to those conditioned on the old, and show that a correction’s impactfulness on the image-domain benchmark results can be predicted in the text domain with similarity scores. Our findings will guide the future development of T2I multilinguality metrics by providing analytical tools for practical translation decisions.
+            Benchmarks of the multilingual capabilities of text-to-image (T2I) models compare generated images prompted in a test language to an expected image distribution over a concept set. One such benchmark, "Conceptual Coverage Across Languages" (CoCo-CroLa), assesses the tangible noun inventory of T2I models by prompting them to generate pictures from a concept list translated to seven languages and comparing the output image populations. Unfortunately, we find that this benchmark contains translation errors of varying severity in Spanish, Japanese, and Chinese. We provide corrections for these errors and analyze how impactful they are on the utility and validity of CoCo-CroLa as a benchmark. We reassess multiple baseline T2I models with the revisions, compare the outputs elicited under the new translations to those conditioned on the old, and show that a correction's impactfulness on the image-domain benchmark results can be predicted in the text domain with similarity scores. Our findings will guide the future development of T2I multilinguality metrics by providing analytical tools for practical translation decisions.
         Other research topics your client is interested in, well-versed in, but doesn't actively publish in:
         1. Ethical AI, including safety, alignment, and societal impacts.
         2. Reasoning models: improving capabilities of them, performance on benchmarks
@@ -91,6 +98,45 @@ class LLMProcessor:
         Please format your responses in clean markdown. Add sections as you see fit, be sure to include a summary, but also add sections for why the client should care, what kinds of specific insights to their work may be found, and what the commenters think. Attribute quotes to the relevant source.
         """
 
+    def _handle_rate_limit(self, attempt: int) -> float:
+        """
+        Calculate backoff time for rate-limited requests using exponential backoff with jitter.
+        Returns the number of seconds to wait before retrying.
+        """
+        # Calculate exponential backoff with jitter
+        backoff = min(self.initial_backoff * (2 ** attempt), self.max_backoff)
+        jitter = random.uniform(0, 0.1 * backoff)  # Add up to 10% jitter
+        return backoff + jitter
+
+    def _make_request_with_retry(self, prompt: str) -> str:
+        """
+        Make a request to the LLM with exponential backoff for rate limits.
+        """
+        attempt = 0
+        last_error = None
+
+        while attempt < self.max_retries:
+            try:
+                response = self.model.generate_content(prompt)
+                return response.text
+            except Exception as e:
+                last_error = e
+                error_str = str(e).lower()
+                
+                # Check if it's a rate limit error
+                if "429" in error_str or "rate limit" in error_str or "quota" in error_str:
+                    backoff = self._handle_rate_limit(attempt)
+                    logger.warning(f"Rate limit hit, attempt {attempt + 1}/{self.max_retries}. "
+                                f"Waiting {backoff:.2f} seconds before retry...")
+                    time.sleep(backoff)
+                    attempt += 1
+                else:
+                    # For non-rate-limit errors, raise immediately
+                    raise
+
+        # If we've exhausted all retries, raise the last error
+        raise last_error
+
     def process_article(self, article: Article, content: Optional[str] = None) -> ProcessedArticle:
         try:
             # If we have full content, use it. Otherwise fall back to summary
@@ -104,14 +150,8 @@ class LLMProcessor:
                 content=article_text
             )
 
-            response = self.model.generate_content(prompt)
-            response_text = response.text
-
-            # Parse the response to extract summary and why_care
-            # parts = response_text.split("\n\n")
-            
-            # summary = parts[0].replace("Summary:", "").strip()
-            # why_care = parts[1].replace("Why Care:", "").strip()
+            # Use the retry mechanism for the LLM request
+            response_text = self._make_request_with_retry(prompt)
 
             # For now, just return the entire response. We will play with more advanced parsing later.
             summary = response_text
