@@ -5,7 +5,7 @@ from article_processor import ArticleProcessor, KeywordFilter, MaxArticlesFilter
 from llm_processor import LLMProcessor, ProcessedArticle
 from markdown_generator import MarkdownGenerator
 from content_fetcher import ContentFetcher
-from article_ranker import DiversityRanker
+from article_ranker import TitleEmbeddingDiversityRanker, SourceDiversityRanker
 import logging
 import json
 from datetime import datetime
@@ -88,7 +88,11 @@ def main():
     llm_processor = LLMProcessor()
     markdown_generator = MarkdownGenerator()
     content_fetcher = ContentFetcher(verbose=config.get('verbose', False))
-    article_ranker = DiversityRanker()
+    
+    # Initialize rankers
+    title_ranker = TitleEmbeddingDiversityRanker()
+    max_articles = config.get('max_articles', 5)  # Default to 5 if not specified
+    source_ranker = SourceDiversityRanker(max_articles)
 
     # Add RSS sources
     for source in config.get('rss_sources', []):
@@ -103,7 +107,6 @@ def main():
     ))
     
     # Add max articles filter
-    max_articles = config.get('max_articles', 5)  # Default to 5 if not specified
     article_processor.add_filter(MaxArticlesFilter(max_articles))
 
     # Fetch and process articles
@@ -113,9 +116,13 @@ def main():
     logger.info("Filtering articles...")
     filtered_articles = article_processor.process_articles(articles)
     
-    # Rank articles by diversity
-    logger.info("Ranking articles by diversity...")
-    ranked_articles = article_ranker.rank_articles(filtered_articles)
+    # First rank by title embedding diversity
+    logger.info("Ranking articles by title embedding diversity...")
+    title_ranked_articles = title_ranker.rank_articles(filtered_articles)
+    
+    # Then rank by source diversity
+    logger.info("Ranking articles by source diversity...")
+    ranked_articles = source_ranker.rank_articles(title_ranked_articles)
     
     # Check if we're in dry run mode
     dry_run = config.get('dry_run', False)
