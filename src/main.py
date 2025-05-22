@@ -48,9 +48,11 @@ def process_articles_sequentially(
                 "Insights not generated in dry run mode"
             )
         else:
-            # Fetch content for main article
+            # Fetch content for main article (including comments if available)
             logger.info(f"Fetching content from {article.link}")
-            main_content, main_image = content_fetcher.fetch_article_content(article.link)
+            if article.comments_link:
+                logger.info(f"Comments link found: {article.comments_link}")
+            main_content, main_image = content_fetcher.fetch_article_with_comments(article)
 
             if main_image:
                 article.image_url = main_image
@@ -59,7 +61,7 @@ def process_articles_sequentially(
             related_contents = []
             for related in article.related_links:
                 logger.info(f"Fetching related article: {related.title}")
-                if content := content_fetcher.fetch_article_content(related.link):
+                if content := content_fetcher.fetch_article_with_comments(related):
                     related_content, related_image = content
                     related_contents.append(f"Related Article from {related.link}:\n{related_content}")
                     if related_image and not article.image_url:  # Use first available image

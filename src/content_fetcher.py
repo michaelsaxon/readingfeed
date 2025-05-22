@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import logging
 import time
-from typing import Optional
+from typing import Optional, Tuple
 from urllib.parse import urlparse, urlunparse
 import random
 import os
@@ -159,69 +159,111 @@ class ContentFetcher:
         
         return None
 
-    def fetch_article_content(self, url: str) -> Optional[str]:
-        """Fetch and parse article content from URL."""
+    def _fetch_url(self, url: str) -> Optional[str]:
+        """Fetch content from URL with error handling and retries."""
         try:
-            # Clean the URL before making the request
-            clean_url = self._clean_url(url)
-            
-            if self.verbose:
-                logger.info(f"Processing URL: {url}")
-                logger.info(f"Cleaned URL: {clean_url}")
-            
-            # Rate limiting
-            current_time = time.time()
-            time_since_last_request = current_time - self.last_request_time
-            if time_since_last_request < self.delay_between_requests:
-                time.sleep(self.delay_between_requests - time_since_last_request)
-            
-            # Make request
-            response = self.session.get(clean_url, timeout=10)
+            response = self.session.get(url, timeout=10)
             response.raise_for_status()
-
-            if self.verbose:
-                logger.info(f"Response status: {response.status_code}")
-                self._save_to_cache(clean_url, response.text)
-            
-            # Update last request time
-            self.last_request_time = time.time()
-            
-            # Parse HTML
-            soup = BeautifulSoup(response.text, 'lxml')
-            
-            # Extract domain for specific rules
-            domain = self._get_domain(clean_url)
-            
-            if self.verbose:
-                logger.info(f"Domain: {domain}")
-            
-            # Extract content
-            content = self._extract_content(soup, domain)
-            
-            if content:
-                if self.verbose:
-                    logger.info(f"Successfully extracted content from {clean_url} (length: {len(content)} chars)")
-                # Cache the content if in verbose mode
-                self._save_to_cache(clean_url, content)
-                
-                # Extract image URL
-                image_url = self._extract_image(soup, domain)
-                if image_url:
-                    if self.verbose:
-                        logger.info(f"Found image: {image_url}")
-                    return content, image_url
-                return content, None
-            else:
-                logger.warning(f"Could not extract content from {clean_url}")
-                if self.verbose:
-                    logger.info("Available HTML structure:")
-                    for tag in soup.find_all(['article', 'main', '.post-content', '.article-content']):
-                        logger.info(f"Found potential content container: {tag.name} with class {tag.get('class', 'no-class')}")
-                return None, None
-                
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Error fetching {url}: {str(e)}")
-            return None, None
+            return response.text
         except Exception as e:
-            logger.error(f"Unexpected error processing {url}: {str(e)}")
-            return None, None 
+            logger.error(f"Error fetching {url}: {str(e)}")
+            return None
+
+    def _extract_comments(self, url: str) -> Optional[str]:
+        """Extract comments from a comments page."""
+        if not url:
+            return None
+
+        content = self._fetch_url(url)
+        if not content:
+            return None
+
+        soup = BeautifulSoup(content, 'html.parser')
+        
+        # Common comment container classes/IDs
+        comment_selectors = [
+            'div.comments', 'div.comment', 'div#comments',
+            'section.comments', 'article.comment',
+            'div.discussion', 'div#discussion',
+            'div.feedback', 'div#feedback'
+        ]
+        
+        comments_text = []
+        for selector in comment_selectors:
+            comments = soup.select(selector)
+            for comment in comments:
+                # Try to get the comment text, removing any nested comments
+                comment_text = comment.get_text(strip=True, separator=' ')
+                if comment_text:
+                    comments_text.append(comment_text)
+        
+        if comments_text:
+            return "\n\n".join(comments_text)
+        return None
+
+    def fetch_article_content(self, url: str) -> Tuple[Optional[str], Optional[str]]:
+        """Fetch article content and extract main image."""
+        content = self._fetch_url(url)
+        if not content:
+            return None, None
+
+        soup = BeautifulSoup(content, 'html.parser')
+        
+        # Extract main content
+        article_text = ""
+        
+        # Try to find the main article content
+        article_selectors = [
+            'article', 'div.article', 'div.post', 'div.entry',
+            'div.content', 'div.main', 'main'
+        ]
+        
+        for selector in article_selectors:
+            article = soup.select_one(selector)
+            if article:
+                article_text = article.get_text(strip=True, separator='\n')
+                break
+        
+        if not article_text:
+            # Fallback to body text if no article container found
+            article_text = soup.body.get_text(strip=True, separator='\n')
+        
+        # Extract main image
+        image_url = None
+        image_selectors = [
+            'meta[property="og:image"]',
+            'meta[name="twitter:image"]',
+            'meta[property="og:image:secure_url"]',
+            'meta[property="og:image:url"]'
+        ]
+        
+        for selector in image_selectors:
+            img_tag = soup.select_one(selector)
+            if img_tag and img_tag.get('content'):
+                image_url = img_tag['content']
+                break
+        
+        if not image_url:
+            # Fallback to first large image in article
+            for img in soup.find_all('img'):
+                if img.get('src'):
+                    src = img['src']
+                    if not src.startswith(('data:', 'http')):
+                        # Handle relative URLs
+                        parsed_url = urlparse(url)
+                        src = f"{parsed_url.scheme}://{parsed_url.netloc}{src}"
+                    image_url = src
+                    break
+        
+        return article_text, image_url
+
+    def fetch_article_with_comments(self, article) -> Tuple[Optional[str], Optional[str]]:
+        """Fetch article content and comments, combining them into a single text."""
+        content, image_url = self.fetch_article_content(article.link)
+        
+        if content and article.comments_link:
+            comments = self._extract_comments(article.comments_link)
+            if comments:
+                content += "\n\nCOMMENTS:\n" + comments
+        
+        return content, image_url 
