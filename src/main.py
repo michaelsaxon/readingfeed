@@ -1,7 +1,10 @@
 import os
 from dotenv import load_dotenv
 from feed_reader import FeedReader, RSSSource
-from article_processor import ArticleProcessor, KeywordFilter, MaxArticlesFilter, RedundancyFilter
+from article_processor import (
+    ArticleProcessor, KeywordFilter, MaxArticlesFilter, RedundancyFilter,
+    ArticleRanker as ArticleRankerProcessor, NegativeKeywordFilter
+)
 from llm_processor import LLMProcessor, ProcessedArticle
 from markdown_generator import MarkdownGenerator
 from content_fetcher import ContentFetcher
@@ -88,41 +91,36 @@ def main():
     llm_processor = LLMProcessor()
     markdown_generator = MarkdownGenerator()
     content_fetcher = ContentFetcher(verbose=config.get('verbose', False))
-    
-    # Initialize rankers
-    title_ranker = TitleEmbeddingDiversityRanker()
-    max_articles = config.get('max_articles', 5)  # Default to 5 if not specified
-    source_ranker = SourceDiversityRanker(max_articles)
 
     # Add RSS sources
     for source in config.get('rss_sources', []):
         feed_reader.add_source(RSSSource(source['url'], source['name']))
 
+    # Add negative keyword filter (before positive keywords)
+    article_processor.add_processor(NegativeKeywordFilter(config.get('negative_keywords', [])))
+
     # Add keyword filter
-    article_processor.add_filter(KeywordFilter(config.get('keywords', [])))
+    article_processor.add_processor(KeywordFilter(config.get('keywords', [])))
     
     # Add redundancy filter
-    article_processor.add_filter(RedundancyFilter(
+    article_processor.add_processor(RedundancyFilter(
         similarity_threshold=config.get('similarity_threshold', 0.85)
     ))
     
-    # Add max articles filter
-    article_processor.add_filter(MaxArticlesFilter(max_articles))
+    # Add rankers
+    article_processor.add_processor(ArticleRankerProcessor(TitleEmbeddingDiversityRanker()))
+    max_articles = config.get('max_articles', 5)  # Default to 5 if not specified
+    article_processor.add_processor(ArticleRankerProcessor(SourceDiversityRanker(max_articles)))
+    
+    # Add max articles filter (after ranking)
+    article_processor.add_processor(MaxArticlesFilter(max_articles))
 
     # Fetch and process articles
     logger.info("Fetching articles...")
     articles = feed_reader.fetch_all_articles()
     
-    logger.info("Filtering articles...")
-    filtered_articles = article_processor.process_articles(articles)
-    
-    # First rank by title embedding diversity
-    logger.info("Ranking articles by title embedding diversity...")
-    title_ranked_articles = title_ranker.rank_articles(filtered_articles)
-    
-    # Then rank by source diversity
-    logger.info("Ranking articles by source diversity...")
-    ranked_articles = source_ranker.rank_articles(title_ranked_articles)
+    logger.info("Processing articles...")
+    processed_articles = article_processor.process_articles(articles)
     
     # Check if we're in dry run mode
     dry_run = config.get('dry_run', False)
@@ -131,7 +129,7 @@ def main():
     
     logger.info("Processing articles sequentially...")
     processed_articles = process_articles_sequentially(
-        ranked_articles,  # Use ranked articles instead of filtered articles
+        processed_articles,
         content_fetcher,
         llm_processor,
         dry_run

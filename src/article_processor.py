@@ -5,13 +5,31 @@ import logging
 from sentence_transformers import SentenceTransformer
 import numpy as np
 from collections import defaultdict
+from article_ranker import ArticleRanker
 
 logger = logging.getLogger(__name__)
 
-class ArticleFilter(ABC):
+class ArticleProcessor(ABC):
+    @abstractmethod
+    def process_articles(self, articles: List[Article], verbose: bool = False) -> List[Article]:
+        pass
+
+class ArticleFilter(ArticleProcessor):
     @abstractmethod
     def filter_articles(self, articles: List[Article], verbose: bool = False) -> List[Article]:
         pass
+
+    def process_articles(self, articles: List[Article], verbose: bool = False) -> List[Article]:
+        return self.filter_articles(articles, verbose)
+
+class ArticleRanker(ArticleProcessor):
+    def __init__(self, ranker: ArticleRanker):
+        self.ranker = ranker
+
+    def process_articles(self, articles: List[Article], verbose: bool = False) -> List[Article]:
+        if verbose:
+            logger.info(f"\nApplying {self.ranker.__class__.__name__}...")
+        return self.ranker.rank_articles(articles)
 
 class KeywordFilter(ArticleFilter):
     def __init__(self, keywords: List[str]):
@@ -110,18 +128,40 @@ class MaxArticlesFilter(ArticleFilter):
         logger.info(f"Limited articles from {len(articles)} to {len(limited_articles)} (max: {self.max_articles})")
         return limited_articles
 
+class NegativeKeywordFilter(ArticleFilter):
+    def __init__(self, negative_keywords: List[str]):
+        self.negative_keywords = [k.lower() for k in negative_keywords]
+
+    def filter_articles(self, articles: List[Article], verbose: bool = False) -> List[Article]:
+        filtered_articles = []
+        for article in articles:
+            # Check if any negative keyword is in the title or summary
+            matches = [keyword for keyword in self.negative_keywords 
+                      if keyword in article.title.lower() or keyword in article.summary.lower()]
+            
+            if not matches:  # Keep articles that don't contain negative keywords
+                filtered_articles.append(article)
+                if verbose:
+                    logger.info(f"✓ Article kept: '{article.title}'")
+            elif verbose:
+                logger.info(f"✗ Article removed: '{article.title}'")
+                logger.info(f"  Matched negative keywords: {', '.join(matches)}")
+        
+        logger.info(f"Negative keyword filter: {len(articles)} articles -> {len(filtered_articles)} articles")
+        return filtered_articles
+
 class ArticleProcessor:
     def __init__(self, verbose: bool = False):
-        self.filters: List[ArticleFilter] = []
+        self.processors: List[ArticleProcessor] = []
         self.verbose = verbose
 
-    def add_filter(self, filter: ArticleFilter):
-        self.filters.append(filter)
+    def add_processor(self, processor: ArticleProcessor):
+        self.processors.append(processor)
 
     def process_articles(self, articles: List[Article]) -> List[Article]:
-        filtered_articles = articles
-        for filter in self.filters:
+        processed_articles = articles
+        for processor in self.processors:
             if self.verbose:
                 logger.info("\n" + "="*50)
-            filtered_articles = filter.filter_articles(filtered_articles, self.verbose)
-        return filtered_articles 
+            processed_articles = processor.process_articles(processed_articles, self.verbose)
+        return processed_articles 
