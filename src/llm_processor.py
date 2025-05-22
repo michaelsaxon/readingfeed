@@ -72,6 +72,7 @@ class LLMProcessor:
         Provide a summary that is contextualized to the topics and interests above. When there are multiple sources, try to pay attention to unique information provided in each and call them out in the summary (NYT says xyz while Vox says abc).
         When the source is a comments page, look at top comments and try to extract verbatim information relating to the above interests.
         Do not generate original text, only extract from the sources.
+        Avoid original editorializing. Do not mention some speculative opinions of others such as "the media will love to watch" unless stated in the article.
 
         Please analyze this article and provide:
         1. A brief but in-depth summary (2-4 paragraphs). If comments are present, extract the top comments and provide a summary of the top comments. Include these in the summary.

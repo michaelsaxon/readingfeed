@@ -75,7 +75,7 @@ The discussion touches on the limitations and potential biases of AI detection t
 
 #### Summary
 
-OpenAI is set to acquire io, an AI device startup co-founded by former Apple designer Jony Ive, in a $6.5 billion all-stock deal. This acquisition marks OpenAI's largest to date, aiming to create AI-powered devices and secure the expertise of Ive and his team, who were instrumental in designing iconic Apple products. According to Bloomberg, "The purchase... will provide the company with a dedicated unit for developing AI-powered devices. Acquiring the secretive startup, named io, also will secure the services of Ive and other former Apple designers who were behind iconic products such as the iPhone."
+OpenAI is set to acquire io, an AI device startup co-founded by former Apple designer Jony Ive, in a \$6.5 billion all-stock deal. This acquisition marks OpenAI's largest to date, aiming to create AI-powered devices and secure the expertise of Ive and his team, who were instrumental in designing iconic Apple products. According to Bloomberg, "The purchase... will provide the company with a dedicated unit for developing AI-powered devices. Acquiring the secretive startup, named io, also will secure the services of Ive and other former Apple designers who were behind iconic products such as the iPhone."
 
 The acquisition also includes approximately 55 engineers, scientists, researchers, physicists, and product development specialists from io, many of whom are former Apple designers. While Ive will retain control of his design firm, LoveFrom, he and his team will lead creative and design efforts at OpenAI, influencing future versions of ChatGPT and other projects, according to The New York Times. Ive and Altman have been working on a device that moves consumers "beyond screens," with the first devices expected to debut in 2026, and a desire to find some physical embodiment for AI systems to interact with users, according to comments in the coverage by both Bloomberg and TechCrunch.
 
@@ -87,7 +87,7 @@ The Hacker News comments section is largely critical of the acquisition. Common 
 
 *   **Skepticism about Ive's post-Apple performance:** Commenters question Ive's ability to replicate his past success, citing design failures such as the butterfly keyboard and the removal of ports from MacBooks. One commenter said, "Ive did good designs when Jobs kept him in check. Once Jobs was gone he messed up a whole generation of MacBooks."
 *   **Concerns about OpenAI's strategic direction:** Some commenters feel that OpenAI is losing focus on AI research and is instead making expensive acquisitions to stay relevant. One commenter wrote, "This is a sign of OpenAI's weakness. Altman is desperately trying to use OpenAI's inflated valuation to buy some kind of advantage."
-*   **Doubts about the valuation and lack of product:** Many question the $6.5 billion valuation of io, especially given the absence of a tangible product or even a website. One commenter stated, "It’s mind boggling how much money is floating around once you are part of the insider circle. What has that company been doing to be worth 6.5 billion?"
+*   **Doubts about the valuation and lack of product:** Many question the \$6.5 billion valuation of io, especially given the absence of a tangible product or even a website. One commenter stated, "It’s mind boggling how much money is floating around once you are part of the insider circle. What has that company been doing to be worth 6.5 billion?"
 *   **Criticism of Sam Altman:** Some commenters express distrust of OpenAI CEO Sam Altman, citing concerns about his past actions and motivations. One commenter suggested that the acquisition is a way for Altman to extract value from OpenAI for personal gain: "Sam Altman who planned and executed the extraction of Reddit from Condé Nast... - Step 2: you acquire that entity, valuing it unreasonably high so that the nonprofit’s stake is diluted."
 *   **Comparisons to past tech failures:** Several commenters draw parallels to past tech failures, such as the Facebook phone and the Humane AI pin, suggesting that OpenAI's hardware venture may face similar challenges. One commenter asked: "How did that work for the Facebook phone? And all their billions of fervent Facebook users?"
 *   **The nature of the deal** Commenters are suspicious of it being an "all stock deal" and what that really means, such as whether this might not be an "acqui-hire"
@@ -109,8 +109,8 @@ The Hacker News comments section is largely critical of the acquisition. Common 
 
 ### Related Articles
 
-- [Jony Ive to lead OpenAI’s design work following $6.5B acquisition of his company](https://techcrunch.com/2025/05/21/jony-ive-to-lead-openais-design-work-following-6-5b-acquisition-of-his-company/)
-- [OpenAI Unites With Jony Ive in $6.5 Billion Deal to Create A.I. Devices](https://www.nytimes.com/2025/05/21/technology/openai-jony-ive-deal.html)
+- [Jony Ive to lead OpenAI’s design work following \$6.5B acquisition of his company](https://techcrunch.com/2025/05/21/jony-ive-to-lead-openais-design-work-following-6-5b-acquisition-of-his-company/)
+- [OpenAI Unites With Jony Ive in \$6.5 Billion Deal to Create A.I. Devices](https://www.nytimes.com/2025/05/21/technology/openai-jony-ive-deal.html)
 
 ---
 
@@ -124,13 +124,13 @@ The Hacker News comments section is largely critical of the acquisition. Common 
 
 Mistral has released Devstral, a new AI model designed for coding, under the Apache 2.0 license, allowing for unrestricted commercial use. Mistral claims that Devstral outperforms open models like Google's Gemma and DeepSeek's V3 on the SWE-Bench Verified benchmark, which measures coding skills. According to Mistral, "Devstral excels at using tools to explore codebases, editing multiple files and power[ing] software engineering agents," and is light enough to run on a single RTX 4090 or a Mac with 32GB RAM, making it suitable for local deployment.
 
-Devstral arrives amidst growing popularity of AI coding assistants. Other companies such as JetBrains, Google, Windsurf, and OpenAI have released models optimized for programming tasks. Although AI models still struggle to produce high-quality code due to weaknesses in understanding programming logic, their potential to boost coding productivity drives rapid adoption. According to one poll, 76% of developers used or planned to use AI tools in their processes last year. Devstral is available on AI development platforms like Hugging Face and through Mistral's API, priced at $0.1 per million input tokens and $0.3 per million output tokens. Mistral says they are "hard at work building a larger agentic coding model that will be available in the coming weeks".
+Devstral arrives amidst growing popularity of AI coding assistants. Other companies such as JetBrains, Google, Windsurf, and OpenAI have released models optimized for programming tasks. Although AI models still struggle to produce high-quality code due to weaknesses in understanding programming logic, their potential to boost coding productivity drives rapid adoption. According to one poll, 76% of developers used or planned to use AI tools in their processes last year. Devstral is available on AI development platforms like Hugging Face and through Mistral's API, priced at \$0.1 per million input tokens and \$0.3 per million output tokens. Mistral says they are "hard at work building a larger agentic coding model that will be available in the coming weeks".
 
 ### Why Does This Matter?
 
 **Model Evaluation & Benchmarking:** The claim that Devstral outperforms other models on SWE-Bench Verified is significant. This highlights the importance of standardized benchmarks for evaluating coding skills in AI models, which is crucial for comparing different approaches and tracking progress. The article mentions Mistral's internal benchmarking evaluations of Devstral, which emphasizes the need for rigorous and transparent evaluation methodologies.
 
-**Commercial Use and Open Licensing:** The Apache 2.0 license enables unrestricted commercial use of Devstral, contrasting with Mistral's previous Codestral, which restricted commercial applications. This could impact the adoption and integration of AI coding tools in various industries. Furthermore, the pricing model for Devstral's API ($0.1 per million input tokens and $0.3 per million output tokens) offers insights into the cost of using these models for commercial applications.
+**Commercial Use and Open Licensing:** The Apache 2.0 license enables unrestricted commercial use of Devstral, contrasting with Mistral's previous Codestral, which restricted commercial applications. This could impact the adoption and integration of AI coding tools in various industries. Furthermore, the pricing model for Devstral's API (\$0.1 per million input tokens and \$0.3 per million output tokens) offers insights into the cost of using these models for commercial applications.
 
 **Agentic Systems & Future Developments:** Mistral's statement about building "a larger agentic coding model" suggests a focus on developing more advanced AI agents for software engineering. The article also mentions that Devstral is designed to run over code agent scaffolds, suggesting that agentic systems and tools that use AI to help engineers are being increasingly deployed. This may accelerate the development of more sophisticated AI-powered development tools.
 
@@ -139,14 +139,14 @@ Devstral arrives amidst growing popularity of AI coding assistants. Other compan
 
 ---
 
-## LM Arena, the organization behind popular AI leaderboards, lands $100M
+## LM Arena, the organization behind popular AI leaderboards, lands \$100M
 
 <img src="https://techcrunch.com/wp-content/uploads/2020/02/GettyImages-115805871.jpg?resize=1200,867" width="500px">
 
 *Source: TechCrunch*
 
 #### Summary
-LM Arena, a UC Berkeley-affiliated project known for its crowdsourced AI model benchmarking, has secured $100 million in seed funding at a $600 million valuation. The round was led by Andreessen Horowitz (a16z) and UC Investments, with participation from Lightspeed Venture Partners, Felicis Ventures, and Kleiner Perkins. LM Arena collaborates with major AI labs like OpenAI, Google, and Anthropic, offering a platform for the community to evaluate flagship models. The organization, formerly funded through grants and donations, has faced accusations of allowing AI labs to "game" its leaderboard, which it denies. According to TechCrunch, the funding will support the project's continued research on "reliable AI."
+LM Arena, a UC Berkeley-affiliated project known for its crowdsourced AI model benchmarking, has secured \$100 million in seed funding at a \$600 million valuation. The round was led by Andreessen Horowitz (a16z) and UC Investments, with participation from Lightspeed Venture Partners, Felicis Ventures, and Kleiner Perkins. LM Arena collaborates with major AI labs like OpenAI, Google, and Anthropic, offering a platform for the community to evaluate flagship models. The organization, formerly funded through grants and donations, has faced accusations of allowing AI labs to "game" its leaderboard, which it denies. According to TechCrunch, the funding will support the project's continued research on "reliable AI."
 
 #### Why this matters
 This funding event highlights the increasing value placed on AI evaluation and benchmarking platforms. It signals the continued importance of community-driven assessment in the AI industry, where standardized metrics are still evolving. The involvement of prominent venture capital firms suggests confidence in LM Arena's role in shaping the development and deployment of AI models.
@@ -201,7 +201,7 @@ Zittrain raises concerns about the implications of LLMs gathering information ab
 
 Einride founder Robert Falck is stepping down as CEO to become executive chairman, focusing on long-term strategy and a potential IPO. CFO Roozbeh Charli is taking over as CEO. Falck founded Einride in 2016 with the goal of transforming the trucking industry with electric and autonomous vehicles, including pods designed without steering wheels or pedals. He wants to focus on long-term value creation, including preparing Einride for a potential IPO.
 
-Charli aims to continue Falck's mission and scale the company responsibly. Einride operates a large fleet of heavy-duty electric trucks in Europe, North America, and the Middle East, serving companies like PepsiCo and Carlsberg Sweden. Einride has raised over $650 million to date, and Falck mentioned in October that an additional $100 million would be needed to reach profitability. The company reported roughly $5 billion in contracted revenue and approximately $50 million in annual recurring revenue for 2024.
+Charli aims to continue Falck's mission and scale the company responsibly. Einride operates a large fleet of heavy-duty electric trucks in Europe, North America, and the Middle East, serving companies like PepsiCo and Carlsberg Sweden. Einride has raised over \$650 million to date, and Falck mentioned in October that an additional \$100 million would be needed to reach profitability. The company reported roughly \$5 billion in contracted revenue and approximately \$50 million in annual recurring revenue for 2024.
 
 #### Why This Matters
 
@@ -244,9 +244,9 @@ This appointment signals a shift in diplomatic norms, potentially opening doors 
 Here's a summary of the Llama Startup Program article and its potential relevance:
 
 #### Summary
-Meta has launched the "Llama for Startups" program to encourage the adoption of its Llama AI models among U.S.-based startups. The program offers direct support from Meta's Llama team and, in some cases, up to $6,000 per month for six months to help offset the costs of building generative AI solutions. To be eligible, startups must be incorporated in the U.S., have raised less than $10 million, and have at least one developer on staff.
+Meta has launched the "Llama for Startups" program to encourage the adoption of its Llama AI models among U.S.-based startups. The program offers direct support from Meta's Llama team and, in some cases, up to \$6,000 per month for six months to help offset the costs of building generative AI solutions. To be eligible, startups must be incorporated in the U.S., have raised less than \$10 million, and have at least one developer on staff.
 
-This initiative aims to solidify Meta's position in the open model space amid increasing competition from rivals like DeepSeek, Google, and Alibaba's Qwen. It comes at a time when Meta is facing challenges, including reported delays in the rollout of its Llama 4 Behemoth model due to underperformance on key benchmarks and allegations of cheating on the LM Arena benchmark by using a version of Llama 4 Maverick optimized for conversationality. Despite these setbacks, Meta anticipates its generative AI products will generate significant revenue in the coming years, projecting $2 billion to $3 billion in 2025 and potentially reaching between $460 billion and $1.4 trillion by 2035. Meta's "GenAI" budget is substantial, exceeding $900 million in 2024 and potentially surpassing $1 billion this year, with plans to invest $60 billion to $80 billion in capital expenditures in 2025, primarily for new data centers.
+This initiative aims to solidify Meta's position in the open model space amid increasing competition from rivals like DeepSeek, Google, and Alibaba's Qwen. It comes at a time when Meta is facing challenges, including reported delays in the rollout of its Llama 4 Behemoth model due to underperformance on key benchmarks and allegations of cheating on the LM Arena benchmark by using a version of Llama 4 Maverick optimized for conversationality. Despite these setbacks, Meta anticipates its generative AI products will generate significant revenue in the coming years, projecting \$2 billion to \$3 billion in 2025 and potentially reaching between \$460 billion and \$1.4 trillion by 2035. Meta's "GenAI" budget is substantial, exceeding \$900 million in 2024 and potentially surpassing \$1 billion this year, with plans to invest \$60 billion to \$80 billion in capital expenditures in 2025, primarily for new data centers.
 
 #### Hacker News Comments
 There are no comments available for the Hacker News link provided.
@@ -452,7 +452,7 @@ Western allies of Kyiv have threatened Russia with further sanctions if Moscow d
 *Source: Semafor*
 
 #### Summary
-The article reports on Stephanie Kelton, an economic advisor to Bernie Sanders, supporting President Trump's suggestion to let tax cuts expire for higher earners. Kelton argues that targeting the $1 million to $2.5 million income bracket with a 39.6% tax rate is "directionally correct" and "the right idea for mitigating the inflation risk." She believes that cutting taxes on Social Security, tips, and overtime would be "likely to be stimulative" and increase the potential for inflation, so offsetting these cuts with targeted tax increases on higher earners would be prudent.
+The article reports on Stephanie Kelton, an economic advisor to Bernie Sanders, supporting President Trump's suggestion to let tax cuts expire for higher earners. Kelton argues that targeting the \$1 million to \$2.5 million income bracket with a 39.6% tax rate is "directionally correct" and "the right idea for mitigating the inflation risk." She believes that cutting taxes on Social Security, tips, and overtime would be "likely to be stimulative" and increase the potential for inflation, so offsetting these cuts with targeted tax increases on higher earners would be prudent.
 
 Kelton, known for her advocacy of Modern Monetary Theory, suggests that the top 10% of Americans account for a large proportion of consumer spending. Therefore, managing their consumption through taxes is a way to manage inflation. Trump's willingness to consider higher taxes on the rich aligns with his "working-class Republican Party" rhetoric, although this position deviates from traditional Republican tax policy. Steve Bannon noted that this shift shows "how much we changed the electorate and how little we’ve changed the party." Newt Gingrich, however, opposes any Republican shift toward higher taxes, warning of Republican in-fighting that the media would love to watch.
 

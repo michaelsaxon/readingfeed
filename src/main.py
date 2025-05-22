@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from feed_reader import FeedReader, RSSSource
 from article_processor import (
     ArticleProcessor, KeywordFilter, MaxArticlesFilter, RedundancyFilter,
-    ArticleRanker as ArticleRankerProcessor, NegativeKeywordFilter
+    ArticleRanker as ArticleRankerProcessor, NegativeKeywordFilter, NoveltyFilter
 )
 from llm_processor import LLMProcessor, ProcessedArticle
 from markdown_generator import MarkdownGenerator
@@ -103,6 +103,13 @@ def main():
 
     # Add keyword filter
     article_processor.add_processor(KeywordFilter(config.get('keywords', [])))
+    
+    # Add novelty filter
+    article_processor.add_processor(NoveltyFilter(
+        output_dir=config.get('output_dir', 'output'),
+        lookback_days=config.get('novelty_lookback_days', 7),
+        similarity_threshold=config.get('novelty_similarity_threshold', 0.85)
+    ))
     
     # Add redundancy filter
     article_processor.add_processor(RedundancyFilter(
